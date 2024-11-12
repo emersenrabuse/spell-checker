@@ -23,6 +23,10 @@ public class WordRecommender {
         }
     }
 
+    public boolean isWordInDictionary(String word) {
+        return dictionaryWords.contains(word);
+    }
+
     public double getSimilarity(String word1, String word2) {
         int commonLetters = 0;
         for (char c : word1.toCharArray()) {

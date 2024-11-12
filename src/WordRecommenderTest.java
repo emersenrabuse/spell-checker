@@ -15,7 +15,7 @@ public class WordRecommenderTest {
         @Test
         public void testSimilarityFunction() {
             WordRecommender recommender = new WordRecommender("engDictionary.txt");
-            double similarity = recommender.calculateSimilarity("example", "sample");
+            double similarity = recommender.getSimilarity("example", "sample");
             assertTrue(similarity > 0, "The similarity score should be greater than 0 for similar words.");
         }
 
