@@ -7,7 +7,7 @@ public class SpellChecker {
     private WordRecommender wordRecommender;
 
     public SpellChecker() {
-        // use constructor later if needed
+
     }
 
     public void start() {
@@ -82,7 +82,6 @@ public class SpellChecker {
         }
     }
 
-
     private char getReplacementChoice(boolean hasSuggestions) {
         Scanner s = new Scanner(System.in);
         while (true) {
@@ -113,7 +112,6 @@ public class SpellChecker {
             } else {
                 System.out.printf(Util.INVALID_RESPONSE);
             }
-
         }
     }
 
