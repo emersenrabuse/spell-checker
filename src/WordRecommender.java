@@ -1,7 +1,9 @@
-o.File;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 public class WordRecommender {
 
@@ -13,7 +15,7 @@ public class WordRecommender {
     }
 
     private void loadDictionary(String dictionaryFile) {
-        try (Scanner scnr = new Scanner (new File(dictionaryFile))) {
+        try (Scanner scnr = new Scanner(new File(dictionaryFile))) {
             while (scnr.hasNextLine()) {
                 dictionaryWords.add(scnr.nextLine().trim());
             }
@@ -22,58 +24,94 @@ public class WordRecommender {
         }
     }
 
-    public boolean isWordInDictionary(String word) {
-        return dictionaryWords.contains(word);
-    }
+    public ArrayList<String> getWordSuggestions(String word, int tolerance, double commonPercent, int topN) {
+        ArrayList<String> suggestions = new ArrayList<>();
 
-    public int getSimilarity(String word1, String word2) {
-        int len1 = word1.length();
-        int len2 = word2.length();
-        int[][] dp = new int[len1 + 1][len2 + 1];
+        for (String dictWord : dictionaryWords) {
+            if (Math.abs(word.length() - dictWord.length()) <= tolerance) {
+                double commonCharacterPercentage = calculateCommonCharacterPercentage(word, dictWord);
 
-        // Initialize the dp array
-        for (int i = 0; i <= len1; i++) {
-            for (int j = 0; j <= len2; j++) {
-                if (i == 0) {
-                    dp[i][j] = j;
-                } else if (j == 0) {
-                    dp[i][j] = i;
-                } else {
-                    dp[i][j] = Math.min(Math.min(dp[i - 1][j - 1] + (word1.charAt(i - 1) == word2.charAt(j - 1) ? 0 : 1), dp[i - 1][j] + 1), dp[i][j - 1] + 1);
+                if (commonCharacterPercentage >= commonPercent) {
+                    double similarity = getSimilarity(word, dictWord);
+
+                    if (suggestions.size() < topN) {
+                        suggestions.add(dictWord);
+                    } else {
+                        String leastSimilarWord = findLeastSimilarWord(word, suggestions);
+                        if (similarity > getSimilarity(word, leastSimilarWord)) {
+                            suggestions.remove(leastSimilarWord);
+                            suggestions.add(dictWord);
+                        }
+                    }
                 }
             }
         }
 
-        return dp[len1][len2];
+        return suggestions;
     }
 
-    public ArrayList<String> getWordSuggestions(String word, int tolerance, double commonPercent, int topN) {
-        ArrayList<String> suggestions = new ArrayList<>();
+    private double calculateCommonCharacterPercentage(String word1, String word2) {
+        Set<Character> aSet = new HashSet<>();
+        Set<Character> bSet = new HashSet<>();
 
-        // Define max distance to tolerate
-        int maxDistance = 2;  // Allow up to 2 edits
+        for (char ch : word1.toCharArray()) aSet.add(ch);
+        for (char ch : word2.toCharArray()) bSet.add(ch);
 
-        // Iterate through the dictionary words
-        for (String dictWord : dictionaryWords) {
-            // If the word length is drastically different, skip 
-            if (Math.abs(word.length() - dictWord.length()) > 3) {
-                continue;  // Skip words with more than 3 length difference
-            }
+        Set<Character> intersection = new HashSet<>(aSet);
+        intersection.retainAll(bSet);
 
-            int distance = getSimilarity(word, dictWord);
+        Set<Character> union = new HashSet<>(aSet);
+        union.addAll(bSet);
 
-            double similarity = 1.0 - (double) distance / Math.max(word.length(), dictWord.length());
+        return (double) intersection.size() / union.size();
+    }
 
-            if (similarity >= commonPercent && distance <= maxDistance) {
-                suggestions.add(dictWord);
-            }
+    public double getSimilarity(String word1, String word2) {
+        int leftSimilarity = calculateLeftSimilarity(word1, word2);
+        int rightSimilarity = calculateRightSimilarity(word1, word2);
 
-            // Stop if we have reached the desired number of suggestions
-            if (suggestions.size() >= topN) {
-                break;
+        return (leftSimilarity + rightSimilarity) / 2.0;
+    }
+
+    private int calculateLeftSimilarity(String word1, String word2) {
+        int minLength = Math.min(word1.length(), word2.length());
+        int similarity = 0;
+
+        for (int i = 0; i < minLength; i++) {
+            if (word1.charAt(i) == word2.charAt(i)) similarity++;
+            else break;
+        }
+        return similarity;
+    }
+
+    private int calculateRightSimilarity(String word1, String word2) {
+        int similarity = 0;
+        int length1 = word1.length();
+        int length2 = word2.length();
+
+        for (int i = 1; i <= Math.min(length1, length2); i++) {
+            if (word1.charAt(length1 - i) == word2.charAt(length2 - i)) similarity++;
+            else break;
+        }
+        return similarity;
+    }
+
+    private String findLeastSimilarWord(String word, ArrayList<String> candidates) {
+        String leastSimilar = candidates.get(0);
+        double minSimilarity = getSimilarity(word, leastSimilar);
+
+        for (String candidate: candidates) {
+            double similarity = getSimilarity(word, candidate);
+            if (similarity < minSimilarity) {
+                minSimilarity = similarity;
+                leastSimilar = candidate;
             }
         }
+        return leastSimilar;
+    }
 
-        return suggestions;
+    // getter for testing
+    public ArrayList<String> getDictionaryWords() {
+        return dictionaryWords;
     }
 }
