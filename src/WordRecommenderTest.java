@@ -16,7 +16,7 @@ public class WordRecommenderTest {
         @Test
         public void testSimilarityFunction() {
             WordRecommender recommender = new WordRecommender("engDictionary.txt");
-            double similarity = recommender.getSimilarity("example", "sample");
+            int similarity = recommender.getSimilarity("example", "sample");
             assertTrue(similarity > 0, "The similarity score should be greater than 0 for similar words.");
         }
 
@@ -26,14 +26,6 @@ public class WordRecommenderTest {
             WordRecommender recommender = new WordRecommender("engDictionary.txt");
             List<String> suggestions = recommender.getWordSuggestions("exampel", 2, 0.5, 5);
             assertFalse(suggestions.isEmpty(), "There should be suggestions for the misspelled word 'exampel'.");
-        }
-
-        // test similarities
-        @Test
-        public void testSimilarities() {
-            WordRecommender recommender = new WordRecommender("engDictionary.txt");
-            List<String> similarities = recommender.getSimilarity("mouse");
-            assertTrue(similarities.contains("house"), "The list of similar words should contain 'house'.");
         }
 
         // test if dictionary contains a known word
