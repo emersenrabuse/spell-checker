@@ -7,7 +7,7 @@ public class SpellChecker {
     private WordRecommender wordRecommender;
 
     public SpellChecker() {
-        // use constructor later if needed
+
     }
 
     public void start() {
@@ -43,22 +43,35 @@ public class SpellChecker {
 
             while (fileScanner.hasNext()) {
                 String word = fileScanner.next();
-                ArrayList<String> suggestions = wordRecommender.getWordSuggestions(word, 2, 0.61, 5);  // Adjusted threshold to 0.6
+                ArrayList<String> suggestions = wordRecommender.getWordSuggestions(word, 2, 0.5, 4);  // Adjusted threshold to 0.6
 
                 if (!suggestions.contains(word)) {
                     System.out.printf(Util.MISSPELL_NOTIFICATION, word);
-                    System.out.println(Util.FOLLOWING_SUGGESTIONS);
 
-                    for (int i = 0; i < suggestions.size(); i++) {
-                        System.out.printf(Util.SUGGESTION_ENTRY, i + 1, suggestions.get(i));
-                    }
-                    char choice = getReplacementChoice();
-                    if (choice == 'r') {
-                        outputWriter.print(suggestions.get(0) + " ");
-                    } else if (choice == 'a') {
-                        outputWriter.print(word + " ");
-                    } else if (choice == 't') {
-                        outputWriter.print(getManualReplacement() + " ");
+                    if (suggestions.isEmpty()) {
+                        // No suggestions available
+                        System.out.printf(Util.NO_SUGGESTIONS);
+                        char choice = getReplacementChoice(false);
+                        if (choice == 'a') {
+                            outputWriter.print(word + " ");
+                        } else if (choice == 't') {
+                            outputWriter.print(getManualReplacement() + " ");
+                        }
+                    } else {
+                        // Suggestions available
+                        System.out.println(Util.FOLLOWING_SUGGESTIONS);
+                        for (int i = 0; i < suggestions.size(); i++) {
+                            System.out.printf(Util.SUGGESTION_ENTRY, i + 1, suggestions.get(i));
+                        }
+                        char choice = getReplacementChoice(true);
+                        if (choice == 'r') {
+                            int selectedIndex = getUserSuggestionChoice(suggestions.size());
+                            outputWriter.print(suggestions.get(selectedIndex) + " ");
+                        } else if (choice == 'a') {
+                            outputWriter.print(word + " ");
+                        } else if (choice == 't') {
+                            outputWriter.print(getManualReplacement() + " ");
+                        }
                     }
                 } else {
                     outputWriter.print(word + " ");
@@ -70,18 +83,40 @@ public class SpellChecker {
     }
 
 
-    private char getReplacementChoice() {
+    private char getReplacementChoice(boolean hasSuggestions) {
         Scanner s = new Scanner(System.in);
         while (true) {
-            System.out.print(Util.THREE_OPTION_PROMPT);
+            if (hasSuggestions) {
+                System.out.print(Util.THREE_OPTION_PROMPT);
+            } else {
+                System.out.print(Util.TWO_OPTION_PROMPT);
+            }
+
             char choice = s.next().charAt(0);
-            if (choice == 'r' || choice == 'a' || choice == 't') {
+            if (hasSuggestions && (choice == 'r' || choice == 'a' || choice == 't')) {
+                return choice;
+            } else if (!hasSuggestions && (choice == 'a' || choice == 't')) {
                 return choice;
             } else {
                 System.out.printf(Util.INVALID_RESPONSE);
             }
         }
     }
+
+    private int getUserSuggestionChoice(int numSuggestions) {
+        Scanner s = new Scanner(System.in);
+        while (true) {
+            System.out.printf(Util.AUTOMATIC_REPLACEMENT_PROMPT);
+            int choice = s.nextInt();
+            if (choice>= 1 && choice <= numSuggestions) {
+                return choice - 1;
+            } else {
+                System.out.printf(Util.INVALID_RESPONSE);
+            }
+
+        }
+    }
+
     private String getManualReplacement(){
         Scanner s = new Scanner(System.in);
         System.out.printf(Util.MANUAL_REPLACEMENT_PROMPT);
