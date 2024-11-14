@@ -1,9 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 public class WordRecommender {
 
@@ -110,8 +107,21 @@ public class WordRecommender {
         return leastSimilar;
     }
 
-    // getter for testing
+    // getters for testing
+
+    public void setDictionaryWords(List<String> words) {
+        this.dictionaryWords = new ArrayList<>(words);
+    }
+
     public ArrayList<String> getDictionaryWords() {
         return dictionaryWords;
+    }
+
+    public double getCommonCharacterPercentage(String word1, String word2) {
+        return calculateCommonCharacterPercentage(word1, word2);
+    }
+
+    public String getLeastSimilarWord(String word, ArrayList<String> candidates) {
+        return findLeastSimilarWord(word, candidates);
     }
 }
