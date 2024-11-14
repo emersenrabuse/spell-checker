@@ -26,15 +26,18 @@ public class WordRecommender {
 
         for (String dictWord : dictionaryWords) {
             if (Math.abs(word.length() - dictWord.length()) <= tolerance) {
-                double commonCharacterPercentage = calculateCommonCharacterPercentage(word, dictWord);
+                double similarity = getSimilarity(word, dictWord);
 
-                if (commonCharacterPercentage >= commonPercent) {
-                    double similarity = getSimilarity(word, dictWord);
-
+                if (similarity >= commonPercent) {
                     if (suggestions.size() < topN) {
                         suggestions.add(dictWord);
                     } else {
-                        String leastSimilarWord = findLeastSimilarWord(word, suggestions);
+                        String leastSimilar = suggestions.get(0);
+                        for (String suggestion : suggestions) {
+                            if (getSimilarity(word, suggestion) < getSimilarity(word, leastSimilar)) {
+                                leastSimilar = suggestion;
+                            }
+                        }
                         if (similarity > getSimilarity(word, leastSimilarWord)) {
                             suggestions.remove(leastSimilarWord);
                             suggestions.add(dictWord);
@@ -63,36 +66,24 @@ public class WordRecommender {
     }
 
     public double getSimilarity(String word1, String word2) {
-        int leftSimilarity = calculateLeftSimilarity(word1, word2);
-        int rightSimilarity = calculateRightSimilarity(word1, word2);
+        double leftSimilarity = 0.0;
+        double rightSimilarity = 0.0;
 
+        int minLength = Math.min(word1.length(), word2.length());
+        for (int i = 0; i < minLength; i++) {
+            if (word1.charAt(i) == word2.charAt(i)) {
+                leftSimilarity++;
+            }
+        }
+        for (int i = 0; i < minLength; i++) {
+            if (word1.charAt(word1.length() - 1 - i) == word2.charAt(word2.length() - 1 - i)) {
+                rightSimilarity++;
+            }
+        }
         return (leftSimilarity + rightSimilarity) / 2.0;
     }
 
-    private int calculateLeftSimilarity(String word1, String word2) {
-        int minLength = Math.min(word1.length(), word2.length());
-        int similarity = 0;
-
-        for (int i = 0; i < minLength; i++) {
-            if (word1.charAt(i) == word2.charAt(i)) similarity++;
-            else break;
-        }
-        return similarity;
-    }
-
-    private int calculateRightSimilarity(String word1, String word2) {
-        int similarity = 0;
-        int length1 = word1.length();
-        int length2 = word2.length();
-
-        for (int i = 1; i <= Math.min(length1, length2); i++) {
-            if (word1.charAt(length1 - i) == word2.charAt(length2 - i)) similarity++;
-            else break;
-        }
-        return similarity;
-    }
-
-    private String findLeastSimilarWord(String word, ArrayList<String> candidates) {
+        private String findLeastSimilarWord(String word, ArrayList<String> candidates) {
         String leastSimilar = candidates.get(0);
         double minSimilarity = getSimilarity(word, leastSimilar);
 
