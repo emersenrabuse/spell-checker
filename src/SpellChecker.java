@@ -15,10 +15,11 @@ public class SpellChecker {
 
         String dictionaryFileName = getValidFileName(Util.DICTIONARY_PROMPT, Util.FILE_OPENING_ERROR, scnr);
         System.out.printf(Util.DICTIONARY_SUCCESS_NOTIFICATION, dictionaryFileName);
+
         wordRecommender = new WordRecommender(dictionaryFileName);
 
         String spellCheckFileName = getValidFileName(Util.FILENAME_PROMPT, Util.FILE_OPENING_ERROR, scnr);
-        System.out.printf(Util.FILE_SUCCESS_NOTIFICATION, spellCheckFileName);
+        System.out.printf(Util.FILE_SUCCESS_NOTIFICATION, spellCheckFileName, spellCheckFileName.replace(".txt", "_chk.txt"));
 
         spellCheckFile(spellCheckFileName);
     }
@@ -26,19 +27,23 @@ public class SpellChecker {
     private String getValidFileName(String prompt, String errorMessage, Scanner scnr) {
         while (true) {
             System.out.printf(prompt);
-            String fileName = scnr.nextLine();
-            if (new File(fileName).exists()) return fileName;
+            String fileName = scnr.nextLine().trim();
+            File file = new File("src/" + fileName);
+
+            if (file.exists()) {
+                return file.getPath();
+            }
             System.out.println(errorMessage);
         }
     }
 
     private void spellCheckFile(String fileName) {
         try (Scanner fileScanner = new Scanner(new File(fileName));
-             PrintWriter outputWriter = new PrintWriter(fileName.replace(".txt", "chk_txt"))) {
+             PrintWriter outputWriter = new PrintWriter(fileName.replace(".txt", "_chk.txt"))) {
 
             while (fileScanner.hasNext()) {
                 String word = fileScanner.next();
-                ArrayList<String> suggestions = wordRecommender.getWordSuggestions(word, 2, 0.5, 5);
+                ArrayList<String> suggestions = wordRecommender.getWordSuggestions(word, 2, 0.61, 5);  // Adjusted threshold to 0.6
 
                 if (!suggestions.contains(word)) {
                     System.out.printf(Util.MISSPELL_NOTIFICATION, word);
@@ -64,6 +69,7 @@ public class SpellChecker {
         }
     }
 
+
     private char getReplacementChoice() {
         Scanner s = new Scanner(System.in);
         while (true) {
@@ -82,5 +88,3 @@ public class SpellChecker {
         return s.nextLine();
     }
 }
-
-
