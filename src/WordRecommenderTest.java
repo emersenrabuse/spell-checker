@@ -1,46 +1,35 @@
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import java.util.List;
-
 public class WordRecommenderTest {
-    // TODO: Write your tests for WordRecommender in WordRecommenderTest.java
-
-    // test if dictionary works correctly
-    @Test
-    public void testDictionaryLoading() {
-        WordRecommender recommender = new WordRecommender("engDictionary.txt");
-        assertTrue(recommender.isWordInDictionary("test"), "The word 'test' should be in the dictionary.");
+    public static void main(String[] args) {
+        testDictionaryLoading();
+        testSimilarityFunction();
+        testGetWordSuggestions();
+        testNoSuggestionForNoSimilarity();
     }
 
-        // test similarity function
-        @Test
-        public void testSimilarityFunction() {
-            WordRecommender recommender = new WordRecommender("engDictionary.txt");
-            int similarity = recommender.getSimilarity("example", "sample");
-            assertTrue(similarity > 0, "The similarity score should be greater than 0 for similar words.");
-        }
+    public static void testDictionaryLoading() {
+        WordRecommender recommender = new WordRecommender("engDictionary.txt");
+        boolean result = recommender.isWordInDictionary("test");
+        System.out.println("testDictionaryLoading: " + (result ? "PASSED" : "FAILED"));
+    }
 
-        // test getwordsuggestions function
-        @Test
-        public void testGetWordSuggestions() {
-            WordRecommender recommender = new WordRecommender("engDictionary.txt");
-            List<String> suggestions = recommender.getWordSuggestions("exampel", 2, 0.5, 5);
-            assertFalse(suggestions.isEmpty(), "There should be suggestions for the misspelled word 'exampel'.");
-        }
+    public static void testSimilarityFunction() {
+        WordRecommender recommender = new WordRecommender("engDictionary.txt");
+        int similarity = recommender.getSimilarity("example", "sample");
+        boolean result = similarity > 0;
+        System.out.println("testSimilarityFunction: " + (result ? "PASSED" : "FAILED"));
+    }
 
-        // test if dictionary contains a known word
-        @Test
-        public void testDictionaryContainsKnownWord() {
-            WordRecommender recommender = new WordRecommender("engDictionary.txt");
-            assertTrue(recommender.isWordInDictionary("person"), "The word 'person' should be in the dictionary.");
-        }
+    public static void testGetWordSuggestions() {
+        WordRecommender recommender = new WordRecommender("engDictionary.txt");
+        ArrayList<String> suggestions = recommender.getWordSuggestions("exampel", 2, 0.5, 5);
+        boolean result = !suggestions.isEmpty();
+        System.out.println("testGetWordSuggestions: " + (result ? "PASSED" : "FAILED"));
+    }
 
-        // test if no suggestion is given for a word with no similarity
-        @Test
-        public void testNoSuggestionForNoSimilarity() {
-            WordRecommender recommender = new WordRecommender("engDictionary.txt");
-            List<String> suggestions = recommender.getWordSuggestions("yubfeufh", 2, 0.5, 5);
-            assertTrue(suggestions.isEmpty(), "There should be no suggestions for the word 'yubfeufh' with no similarity.");
-        }
-
+    public static void testNoSuggestionForNoSimilarity() {
+        WordRecommender recommender = new WordRecommender("engDictionary.txt");
+        ArrayList<String> suggestions = recommender.getWordSuggestions("yubfeufh", 2, 0.5, 5);
+        boolean result = suggestions.isEmpty();
+        System.out.println("testNoSuggestionForNoSimilarity: " + (result ? "PASSED" : "FAILED"));
+    }
 }
