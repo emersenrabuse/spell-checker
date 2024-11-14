@@ -7,7 +7,7 @@ public class SpellChecker {
     private WordRecommender wordRecommender;
 
     public SpellChecker() {
-
+        // use constructor later if needed
     }
 
     public void start() {
