@@ -16,7 +16,6 @@ public class WordRecommenderTest {
         wordRecommender.setDictionaryWords(mockDictionary);
     }
 
-
     @Test
     public void testDictionaryLoading() {
         assertEquals(5, wordRecommender.getDictionaryWords().size());
