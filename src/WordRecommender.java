@@ -43,7 +43,6 @@ public class WordRecommender {
                 }
             }
         }
-
         return suggestions;
     }
 
